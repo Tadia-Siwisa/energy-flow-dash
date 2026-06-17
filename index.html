@@ -1,1 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>South African Grid Flexibility Explorer</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        :root {
+            --bg: #0a0f1a;
+            --bg-panel: rgba(10, 15, 26, 0.96);
+            --text: #dce3f0;
+            --text-dim: #5e6e8a;
+            --solar: #f5c842;
+            --wind: #5cc8f5;
+            --coal: #8a95a8;
+            --hydro: #4dd97a;
+            --demand: #f58c42;
+            --accent: #5cc8f5;
+            --border: rgba(94, 110, 138, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            padding: 18px 20px 14px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            z-index: 100;
+        }
+        .header h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 3px;
+        }
+        .header p {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        /* ===== MAP ===== */
+        .map-wrap {
+            position: relative;
+            width: 100%;
+            height: 62vh;
+            min-height: 360px;
+        }
+        #map { width: 100%; height: 100%; }
+
+        /* ===== SYSTEM NAV BAR ===== */
+        .sys-nav {
+            position: absolute;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 4px;
+            z-index: 500;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 6px;
+            backdrop-filter: blur(10px);
+            max-width: 98vw;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .sys-btn {
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            background: transparent;
+            color: var(--text-dim);
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+            touch-action: manipulation;
+            position: relative;
+        }
+
+        .sys-btn:hover {
+            color: var(--text);
+            background: rgba(94, 110, 138, 0.08);
+        }
+
+        .sys-btn.active {
+            background: var(--accent);
+            color: #0a0f1a;
+            border-color: var(--accent);
+            box-shadow: 0 0 18px rgba(92, 200, 245, 0.2);
+        }
+
+        /* Arrows between buttons */
+        .sys-nav .arrow {
+            display: flex;
+            align-items: center;
+            color: var(--text-dim);
+            font-size: 0.65rem;
+            opacity: 0.3;
+            padding: 0 2px;
+        }
+
+        /* ===== LEGEND (contextual, top-left) ===== */
+        .legend {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 12px;
+            z-index: 500;
+            backdrop-filter: blur(8px);
+            transition: opacity 0.3s;
+        }
+        .legend h4 {
+            font-size: 0.58rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 6px;
+        }
+        .leg-row {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 4px;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+        }
+        .leg-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ===== QUESTION BAR ===== */
+        .question-bar {
+            padding: 14px 20px;
+            background: var(--bg);
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+        .question {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text);
+            line-height: 1.4;
+        }
+        .question .accent {
+            color: var(--accent);
+        }
+
+        /* ===== BOTTOM LINE ===== */
+        .bottom-line {
+            padding: 12px 20px 16px;
+            text-align: center;
+        }
+        .bottom-line p {
+            font-size: 0.76rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+        .bottom-line .kw {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* ===== INFO ===== */
+        .info-row {
+            display: flex;
+            justify-content: center;
+            padding: 0 20px 18px;
+        }
+        .info-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-dim);
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .info-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .info-circle {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            border: 1.5px solid currentColor;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            font-weight: 700;
+        }
+
+        /* ===== MODAL ===== */
+        .modal-bg {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-bg.show { display: flex; }
+        .modal-box {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            animation: pop 0.3s ease;
+        }
+        @keyframes pop {
+            from { opacity: 0; transform: translateY(16px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .modal-box h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; }
+        .modal-box p { font-size: 0.8rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 14px; }
+        .modal-close {
+            padding: 8px 18px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: rgba(92, 200, 245, 0.1);
+            color: var(--accent);
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            float: right;
+        }
+
+        /* ===== LEAFLET ===== */
+        .leaflet-container { background: var(--bg) !important; }
+        .leaflet-control-attribution {
+            font-size: 0.55rem !important;
+            background: rgba(10,15,26,0.85) !important;
+            color: var(--text-dim) !important;
+        }
+        .leaflet-control-attribution a { color: var(--text-dim) !important; }
+
+        .custom-popup .leaflet-popup-content-wrapper {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+        }
+        .custom-popup .leaflet-popup-tip {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+        }
+
+        /* ===== ANIMATIONS ===== */
+        .flow-line {
+            stroke-dasharray: 5, 8;
+            animation: dash 1s linear infinite;
+        }
+        @keyframes dash { to { stroke-dashoffset: -13; } }
+
+        .pulse-ring {
+            animation: pulse 2.5s ease-out infinite;
+            transform-origin: center;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(3.5); opacity: 0; }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (min-width: 768px) {
+            .header h1 { font-size: 1.4rem; }
+            .map-wrap { height: 70vh; }
+            .sys-btn { padding: 12px 22px; font-size: 0.85rem; }
+            .question { font-size: 1.05rem; }
+            .bottom-line p { font-size: 0.82rem; }
+        }
+        @media (max-width: 380px) {
+            .sys-btn { padding: 8px 11px; font-size: 0.68rem; }
+            .header h1 { font-size: 1.05rem; }
+            .sys-nav .arrow { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>South African Grid Flexibility Explorer</h1>
+        <p>How electricity moves through South Africa's evolving power system.</p>
+    </header>
+
+    <div class="map-wrap">
+        <div id="map"></div>
+
+        <!-- Contextual Legend -->
+        <div class="legend" id="legend">
+            <h4 id="legendTitle">Sources</h4>
+            <div id="legendContent">
+                <div class="leg-row"><div class="leg-dot" style="background:var(--solar)"></div>Solar</div>
+                <div class="leg-row"><div class="leg-dot" style="background:var(--wind)"></div>Wind</div>
+                <div class="leg-row"><div class="leg-dot" style="background:var(--coal)"></div>Coal</div>
+                <div class="leg-row"><div class="leg-dot" style="background:var(--hydro)"></div>Hydro</div>
+            </div>
+        </div>
+
+        <!-- System Navigation -->
+        <div class="sys-nav">
+            <button class="sys-btn active" data-view="generation">Generation</button>
+            <span class="arrow">▼</span>
+            <button class="sys-btn" data-view="transmission">Transmission</button>
+            <span class="arrow">▼</span>
+            <button class="sys-btn" data-view="storage">Storage</button>
+            <span class="arrow">▼</span>
+            <button class="sys-btn" data-view="demand">Demand</button>
+        </div>
+    </div>
+
+    <div class="question-bar">
+        <div class="question" id="question">Where does electricity <span class="accent">come from</span>?</div>
+    </div>
+
+    <div class="bottom-line">
+        <p>Grid <span class="kw">Flexibility</span> emerges from the interaction between generation, transmission, storage, and demand.</p>
+    </div>
+
+    <div class="info-row">
+        <button class="info-btn" id="infoBtn">
+            <span class="info-circle">i</span>
+            <span>Research Note</span>
+        </button>
+    </div>
+
+    <div class="modal-bg" id="modal">
+        <div class="modal-box">
+            <h3>About This Visualization</h3>
+            <p>Based on <strong>"Reimagining Grid Flexibility in a Constrained Power System"</strong> by Keith Katyora & Komla Folly (University of Cape Town), SAUPEC 2026.</p>
+            <p>The objective is to help users understand how declining coal performance, renewable integration, transmission constraints, and storage needs interact to shape South Africa's power system.</p>
+            <button class="modal-close" id="modalClose">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== DATA =====
+        const genNodes = [
+            { name: 'Northern Cape', lat: -29.0, lng: 21.5, type: 'solar', color: '#f5c842', desc: 'Solar PV — highest irradiance in SA, but grid-constrained' },
+            { name: 'Western Cape', lat: -33.9, lng: 18.5, type: 'wind', color: '#5cc8f5', desc: 'Wind — strong Atlantic coastal winds' },
+            { name: 'Eastern Cape', lat: -32.3, lng: 27.0, type: 'wind', color: '#5cc8f5', desc: 'Wind — renewable-rich, transmission-limited' },
+            { name: 'Mpumalanga', lat: -25.5, lng: 29.5, type: 'coal', color: '#8a95a8', desc: 'Coal — ageing fleet, declining EAF' },
+            { name: 'Limpopo', lat: -23.5, lng: 29.5, type: 'coal', color: '#8a95a8', desc: 'Coal — Medupi, Matimba power stations' },
+            { name: 'Hydro Node', lat: -28.0, lng: 29.0, type: 'hydro', color: '#4dd97a', desc: 'Pumped Storage — Drakensberg, Ingula' }
+        ];
+
+        const demandNodes = [
+            { name: 'Johannesburg', lat: -26.2, lng: 28.0, desc: 'Gauteng — largest electricity consumer' },
+            { name: 'Pretoria', lat: -25.7, lng: 28.2, desc: 'Tshwane — government & industry hub' },
+            { name: 'Durban', lat: -29.8, lng: 31.0, desc: 'KZN — port, manufacturing, tourism' },
+            { name: 'Cape Town', lat: -33.9, lng: 18.4, desc: 'Western Cape — metro & industry' }
+        ];
+
+        const storageSites = [
+            { name: 'Drakensberg PS', lat: -28.7, lng: 29.0, type: 'pumped' },
+            { name: 'Ingula PS', lat: -28.3, lng: 29.1, type: 'pumped' },
+            { name: 'Palmiet PS', lat: -34.0, lng: 19.0, type: 'pumped' },
+            { name: 'BESS Northern Cape', lat: -28.5, lng: 21.5, type: 'bess' },
+            { name: 'BESS Gauteng', lat: -26.0, lng: 28.1, type: 'bess' }
+        ];
+
+        // All flow connections
+        const flows = [
+            { from: [-29.0, 21.5], to: [-26.2, 28.0], color: '#f5c842', source: 'solar', critical: true },
+            { from: [-29.0, 21.5], to: [-25.7, 28.2], color: '#f5c842', source: 'solar' },
+            { from: [-33.9, 18.5], to: [-33.9, 18.4], color: '#5cc8f5', source: 'wind' },
+            { from: [-32.3, 27.0], to: [-29.8, 31.0], color: '#5cc8f5', source: 'wind' },
+            { from: [-32.3, 27.0], to: [-26.2, 28.0], color: '#5cc8f5', source: 'wind' },
+            { from: [-25.5, 29.5], to: [-26.2, 28.0], color: '#8a95a8', source: 'coal' },
+            { from: [-25.5, 29.5], to: [-25.7, 28.2], color: '#8a95a8', source: 'coal' },
+            { from: [-23.5, 29.5], to: [-26.2, 28.0], color: '#8a95a8', source: 'coal' },
+            { from: [-23.5, 29.5], to: [-25.7, 28.2], color: '#8a95a8', source: 'coal' },
+            { from: [-28.0, 29.0], to: [-26.2, 28.0], color: '#4dd97a', source: 'hydro' },
+            { from: [-28.0, 29.0], to: [-25.7, 28.2], color: '#4dd97a', source: 'hydro' }
+        ];
+
+        // ===== MAP =====
+        const map = L.map('map', {
+            zoomControl: false,
+            attributionControl: true,
+            minZoom: 5,
+            maxZoom: 10
+        }).setView([-29.0, 25.0], 5);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OSM & CARTO',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        // ===== ICONS =====
+        function genIcon(color) {
+            return L.divIcon({
+                className: '',
+                html: `<svg width="30" height="30" viewBox="0 0 30 30">
+                    <circle cx="15" cy="15" r="11" fill="${color}" opacity="0.9"/>
+                    <circle cx="15" cy="15" r="11" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.3" class="pulse-ring"/>
+                </svg>`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+        }
+
+        function demandIcon() {
+            return L.divIcon({
+                className: '',
+                html: `<svg width="26" height="26" viewBox="0 0 26 26">
+                    <polygon points="13,3 23,23 3,23" fill="#f58c42" opacity="0.9"/>
+                </svg>`,
+                iconSize: [26, 26],
+                iconAnchor: [13, 13]
+            });
+        }
+
+        function storageIcon() {
+            return L.divIcon({
+                className: '',
+                html: `<svg width="22" height="22" viewBox="0 0 22 22">
+                    <rect x="4" y="4" width="14" height="14" rx="3" fill="#4dd97a" opacity="0.85"/>
+                    <rect x="4" y="4" width="14" height="14" rx="3" fill="none" stroke="#4dd97a" stroke-width="1.5" opacity="0.3" class="pulse-ring"/>
+                </svg>`,
+                iconSize: [22, 22],
+                iconAnchor: [11, 11]
+            });
+        }
+
+        // ===== LAYERS =====
+        const genMarkers = [];
+        const demandMarkers = [];
+        const storageMarkers = [];
+        const flowLayers = [];
+        const tempLayers = []; // for view-specific overlays
+
+        // Generation markers
+        genNodes.forEach(n => {
+            const m = L.marker([n.lat, n.lng], { icon: genIcon(n.color) }).addTo(map);
+            m.bindPopup(`<div style="font-weight:700;font-size:0.85rem;margin-bottom:3px">${n.name}</div><div style="font-size:0.74rem;color:#5e6e8a">${n.desc}</div>`, { className: 'custom-popup' });
+            m._type = n.type;
+            genMarkers.push(m);
+        });
+
+        // Demand markers
+        demandNodes.forEach(n => {
+            const m = L.marker([n.lat, n.lng], { icon: demandIcon() }).addTo(map);
+            m.bindPopup(`<div style="font-weight:700;font-size:0.85rem;margin-bottom:3px">${n.name}</div><div style="font-size:0.74rem;color:#5e6e8a">${n.desc}</div>`, { className: 'custom-popup' });
+            demandMarkers.push(m);
+        });
+
+        // Flow lines with particles
+        flows.forEach(f => {
+            const line = L.polyline([f.from, f.to], {
+                color: f.color,
+                weight: f.critical ? 3 : 2,
+                opacity: 0.4,
+                dashArray: f.critical ? '5,7' : '3,8',
+                className: 'flow-line'
+            }).addTo(map);
+
+            const particle = L.circleMarker(f.to, {
+                radius: f.critical ? 5 : 3,
+                fillColor: f.color,
+                color: f.color,
+                weight: 0,
+                fillOpacity: 0.85,
+                opacity: 0.85
+            }).addTo(map);
+
+            let t = 0;
+            const speed = f.critical ? 0.007 : 0.005;
+            function anim() {
+                t += speed;
+                if (t > 1) t = 0;
+                particle.setLatLng([
+                    f.from[0] + (f.to[0] - f.from[0]) * t,
+                    f.from[1] + (f.to[1] - f.from[1]) * t
+                ]);
+                requestAnimationFrame(anim);
+            }
+            anim();
+
+            flowLayers.push({ line, particle, source: f.source, critical: f.critical });
+        });
+
+        // ===== VIEW STATE =====
+        const views = {
+            generation: {
+                question: 'Where does electricity <span class="accent">come from</span>?',
+                legendTitle: 'Generation Sources',
+                legend: [
+                    { dot: 'var(--solar)', label: 'Solar' },
+                    { dot: 'var(--wind)', label: 'Wind' },
+                    { dot: 'var(--coal)', label: 'Coal' },
+                    { dot: 'var(--hydro)', label: 'Hydro' }
+                ]
+            },
+            transmission: {
+                question: 'How does electricity <span class="accent">move</span>?',
+                legendTitle: 'Flow Types',
+                legend: [
+                    { dot: '#f5c842', label: 'Solar → Demand' },
+                    { dot: '#5cc8f5', label: 'Wind → Demand' },
+                    { dot: '#8a95a8', label: 'Coal → Demand' },
+                    { dot: '#4dd97a', label: 'Hydro → Demand' },
+                    { dot: '#f58c42', label: '⚠ Critical Corridor' }
+                ]
+            },
+            storage: {
+                question: 'Where can energy <span class="accent">wait</span>?',
+                legendTitle: 'Storage Types',
+                legend: [
+                    { dot: '#4dd97a', label: 'Pumped Hydro' },
+                    { dot: '#5cc8f5', label: 'Battery (BESS)' }
+                ]
+            },
+            demand: {
+                question: 'Where is electricity <span class="accent">needed</span>?',
+                legendTitle: 'Demand Centres',
+                legend: [
+                    { dot: '#f58c42', label: 'Major Load Centres' }
+                ]
+            }
+        };
+
+        let currentView = 'generation';
+
+        // ===== CLEAR TEMP LAYERS =====
+        function clearTemp() {
+            tempLayers.forEach(l => map.removeLayer(l));
+            tempLayers.length = 0;
+        }
+
+        function setOpacity(markers, opacity, scale = 1) {
+            markers.forEach(m => {
+                const el = m.getElement();
+                if (el) {
+                    el.style.opacity = opacity;
+                    el.style.transform = scale !== 1 ? `scale(${scale})` : 'scale(1)';
+                    el.style.filter = opacity < 0.3 ? 'grayscale(1)' : 'none';
+                    el.style.transition = 'all 0.4s ease';
+                }
+            });
+        }
+
+        function setFlowOpacity(opacity, weight = 2, criticalOpacity = null) {
+            flowLayers.forEach(({ line, critical }) => {
+                line.setStyle({
+                    opacity: critical && criticalOpacity !== null ? criticalOpacity : opacity,
+                    weight: weight
+                });
+            });
+        }
+
+        // ===== APPLY VIEW =====
+        function applyView(view) {
+            clearTemp();
+            currentView = view;
+
+            // Update question
+            document.getElementById('question').innerHTML = views[view].question;
+
+            // Update legend
+            document.getElementById('legendTitle').textContent = views[view].legendTitle;
+            const legContent = document.getElementById('legendContent');
+            legContent.innerHTML = views[view].legend.map(l =>
+                `<div class="leg-row"><div class="leg-dot" style="background:${l.dot}"></div>${l.label}</div>`
+            ).join('');
+
+            // Reset all
+            setOpacity(genMarkers, 1);
+            setOpacity(demandMarkers, 1);
+            storageMarkers.forEach(m => {
+                const el = m.getElement();
+                if (el) {
+                    el.style.opacity = '0';
+                    el.style.transition = 'opacity 0.4s ease';
+                }
+            });
+            setFlowOpacity(0.4, 2);
+
+            if (view === 'generation') {
+                // Generation nodes POP. Everything else fades.
+                setOpacity(genMarkers, 1, 1.3);
+                setOpacity(demandMarkers, 0.25, 0.9);
+                setFlowOpacity(0.15, 1);
+            }
+
+            if (view === 'transmission') {
+                // ALL nodes visible but subdued. FLOWS are the hero.
+                setOpacity(genMarkers, 0.5, 0.9);
+                setOpacity(demandMarkers, 0.5, 0.9);
+                setFlowOpacity(0.9, 4);
+
+                // Critical corridor highlight
+                const corridor = L.polyline([[-29.0, 21.5], [-26.2, 28.0]], {
+                    color: '#f58c42',
+                    weight: 8,
+                    opacity: 0.5,
+                    dashArray: '14,6',
+                    className: 'flow-line'
+                }).addTo(map);
+                tempLayers.push(corridor);
+
+                // Warning zone
+                const warn = L.circleMarker([-27.5, 24.5], {
+                    radius: 20,
+                    fillColor: '#f58c42',
+                    color: '#f58c42',
+                    weight: 0,
+                    fillOpacity: 0.12
+                }).addTo(map);
+                tempLayers.push(warn);
+
+                // Label
+                const label = L.marker([-27.5, 24.5], {
+                    icon: L.divIcon({
+                        className: '',
+                        html: '<div style="background:rgba(245,140,66,0.18);color:#f58c42;padding:6px 14px;border-radius:10px;font-size:0.74rem;font-weight:700;border:1.5px solid rgba(245,140,66,0.4);white-space:nowrap;backdrop-filter:blur(4px)">⚠ BOTTLENECK</div>',
+                        iconSize: [130, 30],
+                        iconAnchor: [65, -18]
+                    })
+                }).addTo(map);
+                tempLayers.push(label);
+            }
+
+            if (view === 'storage') {
+                // Generation fades. Demand visible but subdued. Storage APPEARS.
+                setOpacity(genMarkers, 0.2, 0.8);
+                setOpacity(demandMarkers, 0.5, 0.9);
+                setFlowOpacity(0.2, 1);
+
+                // Add storage markers
+                storageSites.forEach(s => {
+                    const m = L.marker([s.lat, s.lng], { icon: storageIcon() }).addTo(map);
+                    m.bindPopup(`<div style="font-weight:700;font-size:0.8rem">${s.name}</div><div style="font-size:0.72rem;color:#5e6e8a">${s.type === 'pumped' ? 'Pumped Hydro Storage' : 'Battery Energy Storage (BESS)'}</div>`, { className: 'custom-popup' });
+                    storageMarkers.push(m);
+
+                    // Pulse ring
+                    const pulse = L.circleMarker([s.lat, s.lng], {
+                        radius: 8,
+                        fillColor: '#4dd97a',
+                        color: '#4dd97a',
+                        weight: 0,
+                        fillOpacity: 0.4,
+                        className: 'pulse-ring'
+                    }).addTo(map);
+                    tempLayers.push(pulse);
+                });
+
+                // Storage-to-demand flow hints
+                const sFlow1 = L.polyline([[-28.7, 29.0], [-26.2, 28.0]], {
+                    color: '#4dd97a', weight: 2, opacity: 0.5, dashArray: '4,6', className: 'flow-line'
+                }).addTo(map);
+                tempLayers.push(sFlow1);
+
+                const sFlow2 = L.polyline([[-28.3, 29.1], [-25.7, 28.2]], {
+                    color: '#4dd97a', weight: 2, opacity: 0.5, dashArray: '4,6', className: 'flow-line'
+                }).addTo(map);
+                tempLayers.push(sFlow2);
+            }
+
+            if (view === 'demand') {
+                // Demand nodes POP. Generation fades. Flows show direction TO demand.
+                setOpacity(genMarkers, 0.2, 0.8);
+                setOpacity(demandMarkers, 1, 1.4);
+                setFlowOpacity(0.6, 3);
+            }
+        }
+
+        // ===== NAVIGATION =====
+        const btns = document.querySelectorAll('.sys-btn');
+        btns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                btns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                applyView(btn.dataset.view);
+            });
+        });
+
+        // ===== MODAL =====
+        document.getElementById('infoBtn').addEventListener('click', () => {
+            document.getElementById('modal').classList.add('show');
+        });
+        document.getElementById('modalClose').addEventListener('click', () => {
+            document.getElementById('modal').classList.remove('show');
+        });
+        document.getElementById('modal').addEventListener('click', e => {
+            if (e.target.id === 'modal') document.getElementById('modal').classList.remove('show');
+        });
+
+        // ===== INIT =====
+        applyView('generation');
+        setTimeout(() => map.invalidateSize(), 100);
+        window.addEventListener('resize', () => map.invalidateSize());
+    </script>
+</body>
+</html>
