@@ -14,6 +14,7 @@
             --bg-panel: rgba(10, 15, 26, 0.96);
             --text: #dce3f0;
             --text-dim: #5e6e8a;
+            --text-muted: #3a4a66;
             --solar: #f5c842;
             --wind: #5cc8f5;
             --coal: #8a95a8;
@@ -21,6 +22,9 @@
             --demand: #f58c42;
             --accent: #5cc8f5;
             --border: rgba(94, 110, 138, 0.1);
+            --high: #4dd97a;
+            --medium: #f5c842;
+            --low: #8a95a8;
         }
 
         body {
@@ -31,7 +35,6 @@
             min-height: 100vh;
         }
 
-        /* ===== HEADER ===== */
         .header {
             padding: 18px 20px 14px;
             background: var(--bg);
@@ -51,7 +54,6 @@
             line-height: 1.5;
         }
 
-        /* ===== MAP ===== */
         .map-wrap {
             position: relative;
             width: 100%;
@@ -60,7 +62,6 @@
         }
         #map { width: 100%; height: 100%; }
 
-        /* ===== SYSTEM NAV BAR ===== */
         .sys-nav {
             position: absolute;
             bottom: 14px;
@@ -78,7 +79,6 @@
             flex-wrap: wrap;
             justify-content: center;
         }
-
         .sys-btn {
             padding: 10px 16px;
             border-radius: 10px;
@@ -91,22 +91,17 @@
             transition: all 0.25s ease;
             white-space: nowrap;
             touch-action: manipulation;
-            position: relative;
         }
-
         .sys-btn:hover {
             color: var(--text);
             background: rgba(94, 110, 138, 0.08);
         }
-
         .sys-btn.active {
             background: var(--accent);
             color: #0a0f1a;
             border-color: var(--accent);
             box-shadow: 0 0 18px rgba(92, 200, 245, 0.2);
         }
-
-        /* Arrows between buttons */
         .sys-nav .arrow {
             display: flex;
             align-items: center;
@@ -116,7 +111,81 @@
             padding: 0 2px;
         }
 
-        /* ===== LEGEND (contextual, top-left) ===== */
+        /* Model Status Panel */
+        .model-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            z-index: 500;
+            backdrop-filter: blur(8px);
+            width: 210px;
+            transition: all 0.3s ease;
+        }
+        .model-panel.collapsed {
+            width: auto;
+            padding: 8px 12px;
+        }
+        .model-panel.collapsed .model-body {
+            display: none;
+        }
+        .model-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            gap: 8px;
+        }
+        .model-header h4 {
+            font-size: 0.62rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .model-toggle {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            transition: transform 0.2s;
+        }
+        .model-panel.collapsed .model-toggle {
+            transform: rotate(-90deg);
+        }
+        .model-body {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+        .model-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 0.68rem;
+        }
+        .model-row:last-child { margin-bottom: 0; }
+        .model-label { color: var(--text-dim); }
+        .model-status {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+        }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+        .status-ok { color: var(--high); }
+        .status-ok .status-dot { background: var(--high); }
+        .status-mid { color: var(--medium); }
+        .status-mid .status-dot { background: var(--medium); }
+        .status-no { color: var(--text-muted); }
+        .status-no .status-dot { background: var(--text-muted); }
+
         .legend {
             position: absolute;
             top: 10px;
@@ -152,7 +221,6 @@
             flex-shrink: 0;
         }
 
-        /* ===== QUESTION BAR ===== */
         .question-bar {
             padding: 14px 20px;
             background: var(--bg);
@@ -169,7 +237,6 @@
             color: var(--accent);
         }
 
-        /* ===== BOTTOM LINE ===== */
         .bottom-line {
             padding: 12px 20px 16px;
             text-align: center;
@@ -184,7 +251,6 @@
             font-weight: 600;
         }
 
-        /* ===== INFO ===== */
         .info-row {
             display: flex;
             justify-content: center;
@@ -219,7 +285,6 @@
             font-weight: 700;
         }
 
-        /* ===== MODAL ===== */
         .modal-bg {
             position: fixed;
             inset: 0;
@@ -236,7 +301,7 @@
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 24px;
-            max-width: 400px;
+            max-width: 420px;
             width: 100%;
             animation: pop 0.3s ease;
         }
@@ -258,7 +323,6 @@
             float: right;
         }
 
-        /* ===== LEAFLET ===== */
         .leaflet-container { background: var(--bg) !important; }
         .leaflet-control-attribution {
             font-size: 0.55rem !important;
@@ -278,7 +342,6 @@
             border: 1px solid var(--border);
         }
 
-        /* ===== ANIMATIONS ===== */
         .flow-line {
             stroke-dasharray: 5, 8;
             animation: dash 1s linear infinite;
@@ -294,18 +357,18 @@
             100% { transform: scale(3.5); opacity: 0; }
         }
 
-        /* ===== RESPONSIVE ===== */
         @media (min-width: 768px) {
             .header h1 { font-size: 1.4rem; }
             .map-wrap { height: 70vh; }
             .sys-btn { padding: 12px 22px; font-size: 0.85rem; }
             .question { font-size: 1.05rem; }
-            .bottom-line p { font-size: 0.82rem; }
+            .model-panel { width: 230px; }
         }
         @media (max-width: 380px) {
             .sys-btn { padding: 8px 11px; font-size: 0.68rem; }
             .header h1 { font-size: 1.05rem; }
             .sys-nav .arrow { display: none; }
+            .model-panel { width: 170px; padding: 10px; }
         }
     </style>
 </head>
@@ -318,18 +381,48 @@
     <div class="map-wrap">
         <div id="map"></div>
 
-        <!-- Contextual Legend -->
         <div class="legend" id="legend">
             <h4 id="legendTitle">Sources</h4>
-            <div id="legendContent">
-                <div class="leg-row"><div class="leg-dot" style="background:var(--solar)"></div>Solar</div>
-                <div class="leg-row"><div class="leg-dot" style="background:var(--wind)"></div>Wind</div>
-                <div class="leg-row"><div class="leg-dot" style="background:var(--coal)"></div>Coal</div>
-                <div class="leg-row"><div class="leg-dot" style="background:var(--hydro)"></div>Hydro</div>
+            <div id="legendContent"></div>
+        </div>
+
+        <div class="model-panel" id="modelPanel">
+            <div class="model-header" id="modelHeader">
+                <h4>Model Status</h4>
+                <span class="model-toggle">▼</span>
+            </div>
+            <div class="model-body" id="modelBody">
+                <div class="model-row">
+                    <span class="model-label">Infrastructure</span>
+                    <span class="model-status status-ok"><span class="status-dot"></span>Known</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-label">Generation Regions</span>
+                    <span class="model-status status-ok"><span class="status-dot"></span>Known</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-label">Demand Centres</span>
+                    <span class="model-status status-ok"><span class="status-dot"></span>Known</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-label">Energy Flows</span>
+                    <span class="model-status status-mid"><span class="status-dot"></span>Conceptual</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-label">Congestion Analysis</span>
+                    <span class="model-status status-no"><span class="status-dot"></span>Not Modelled</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-label">Transmission Loading</span>
+                    <span class="model-status status-no"><span class="status-dot"></span>Not Modelled</span>
+                </div>
+                <div class="model-row">
+                    <span class="model-label">Storage Dispatch</span>
+                    <span class="model-status status-no"><span class="status-dot"></span>Not Modelled</span>
+                </div>
             </div>
         </div>
 
-        <!-- System Navigation -->
         <div class="sys-nav">
             <button class="sys-btn active" data-view="generation">Generation</button>
             <span class="arrow">▼</span>
@@ -352,67 +445,341 @@
     <div class="info-row">
         <button class="info-btn" id="infoBtn">
             <span class="info-circle">i</span>
-            <span>Research Note</span>
+            <span>About</span>
         </button>
     </div>
 
     <div class="modal-bg" id="modal">
         <div class="modal-box">
             <h3>About This Visualization</h3>
-            <p>Based on <strong>"Reimagining Grid Flexibility in a Constrained Power System"</strong> by Keith Katyora & Komla Folly (University of Cape Town), SAUPEC 2026.</p>
-            <p>The objective is to help users understand how declining coal performance, renewable integration, transmission constraints, and storage needs interact to shape South Africa's power system.</p>
+            <p>This visualization is a systems map inspired by research into South Africa's energy transition.</p>
+            <p>Its purpose is to help users understand the relationships between generation, transmission, storage, and demand.</p>
+            <p>The dashboard is not intended to identify operational bottlenecks or provide real-time grid analysis.</p>
+            <p>Some infrastructure locations are based on public information, while certain flow representations remain conceptual.</p>
             <button class="modal-close" id="modalClose">Close</button>
         </div>
     </div>
 
     <script>
-        // ===== DATA =====
+        // ===== VERIFIED INFRASTRUCTURE DATA =====
+        // All coordinates from Global Energy Monitor, Wikipedia, or official Eskom sources
+        // Coal: exact WGS 84 coordinates from GEM
+        // Solar: exact coordinates from GEM for named farms; regional clusters where exact data unavailable
+        // Wind: exact coordinates from GEM for named farms; regional clusters where exact data unavailable
+        // Hydro: exact coordinates from GEM
+        // BESS: approximate substation locations from Eskom/WSP project data
+
         const genNodes = [
-            { name: 'Northern Cape', lat: -29.0, lng: 21.5, type: 'solar', color: '#f5c842', desc: 'Solar PV — highest irradiance in SA, but grid-constrained' },
-            { name: 'Western Cape', lat: -33.9, lng: 18.5, type: 'wind', color: '#5cc8f5', desc: 'Wind — strong Atlantic coastal winds' },
-            { name: 'Eastern Cape', lat: -32.3, lng: 27.0, type: 'wind', color: '#5cc8f5', desc: 'Wind — renewable-rich, transmission-limited' },
-            { name: 'Mpumalanga', lat: -25.5, lng: 29.5, type: 'coal', color: '#8a95a8', desc: 'Coal — ageing fleet, declining EAF' },
-            { name: 'Limpopo', lat: -23.5, lng: 29.5, type: 'coal', color: '#8a95a8', desc: 'Coal — Medupi, Matimba power stations' },
-            { name: 'Hydro Node', lat: -28.0, lng: 29.0, type: 'hydro', color: '#4dd97a', desc: 'Pumped Storage — Drakensberg, Ingula' }
+            // === COAL — Exact power station coordinates (Global Energy Monitor) ===
+            {
+                name: 'Kendal PS',
+                lat: -26.090285, lng: 28.968796,
+                type: 'coal', color: '#8a95a8',
+                desc: '4,116 MW — dry-cooled coal station, Ogies, Mpumalanga',
+                confidence: 'HIGH',
+                confidenceReason: 'Exact WGS 84 coordinates (Global Energy Monitor)'
+            },
+            {
+                name: 'Matla PS',
+                lat: -26.281332, lng: 29.141506,
+                type: 'coal', color: '#8a95a8',
+                desc: '3,600 MW — coal station, Kriel, Mpumalanga',
+                confidence: 'HIGH',
+                confidenceReason: 'Exact WGS 84 coordinates (Global Energy Monitor)'
+            },
+            {
+                name: 'Kusile PS',
+                lat: -25.92007, lng: 28.924942,
+                type: 'coal', color: '#8a95a8',
+                desc: '4,800 MW — supercritical coal station, eMalahleni, Mpumalanga',
+                confidence: 'HIGH',
+                confidenceReason: 'Exact WGS 84 coordinates (Global Energy Monitor)'
+            },
+            {
+                name: 'Duvha PS',
+                lat: -25.961261, lng: 29.339713,
+                type: 'coal', color: '#8a95a8',
+                desc: '3,600 MW — coal station, eMalahleni, Mpumalanga',
+                confidence: 'HIGH',
+                confidenceReason: 'Exact WGS 84 coordinates (Global Energy Monitor)'
+            },
+            {
+                name: 'Majuba PS',
+                lat: -27.10061, lng: 29.770963,
+                type: 'coal', color: '#8a95a8',
+                desc: '4,110 MW — coal station, Amersfoort, Mpumalanga',
+                confidence: 'HIGH',
+                confidenceReason: 'Exact WGS 84 coordinates (Global Energy Monitor)'
+            },
+            {
+                name: 'Tutuka PS',
+                lat: -26.777156, lng: 29.352376,
+                type: 'coal', color: '#8a95a8',
+                desc: '3,654 MW — coal station, Standerton, Mpumalanga',
+                confidence: 'HIGH',
+                confidenceReason: 'Exact WGS 84 coordinates (Global Energy Monitor)'
+            },
+            {
+                name: 'Medupi PS',
+                lat: -23.704973, lng: 27.563839,
+                type: 'coal', color: '#8a95a8',
+                desc: '4,764 MW — supercritical coal station, Lephalale, Limpopo',
+                confidence: 'HIGH',
+                confidenceReason: 'Exact WGS 84 coordinates (Global Energy Monitor)'
+            },
+            {
+                name: 'Matimba PS',
+                lat: -23.668833, lng: 27.610838,
+                type: 'coal', color: '#8a95a8',
+                desc: '3,990 MW — coal station, Lephalale, Limpopo',
+                confidence: 'HIGH',
+                confidenceReason: 'Exact WGS 84 coordinates (Global Energy Monitor)'
+            },
+            {
+                name: 'Lethabo PS',
+                lat: -26.742032, lng: 27.976892,
+                type: 'coal', color: '#8a95a8',
+                desc: '3,708 MW — coal station, Viljoensdrif, Free State',
+                confidence: 'HIGH',
+                confidenceReason: 'Exact WGS 84 coordinates (Global Energy Monitor)'
+            },
+
+            // === SOLAR — Named farms with exact coordinates where available ===
+            {
+                name: 'Kenhardt Solar',
+                lat: -29.1887, lng: 21.2970,
+                type: 'solar', color: '#f5c842',
+                desc: '540 MW (3 phases) — Scatec/H1 Holdings, Kenhardt, Northern Cape',
+                confidence: 'HIGH',
+                confidenceReason: 'Exact WGS 84 coordinates (Global Energy Monitor)'
+            },
+            {
+                name: 'De Aar Solar',
+                lat: -30.625, lng: 24.02944,
+                type: 'solar', color: '#f5c842',
+                desc: '175 MW — Solar Capital, De Aar, Northern Cape',
+                confidence: 'HIGH',
+                confidenceReason: 'Exact coordinates (Wikipedia / REIPPPP)'
+            },
+            {
+                name: 'Upington Solar Cluster',
+                lat: -28.45, lng: 21.25,
+                type: 'solar', color: '#f5c842',
+                desc: 'Solar PV cluster — Dyason Klip, XiNa, Karoshoek, Kathu (REIPPPP BW 3-5)',
+                confidence: 'MEDIUM',
+                confidenceReason: 'Regional cluster centre based on multiple REIPPPP project locations'
+            },
+
+            // === WIND — Named farms with exact coordinates where available ===
+            {
+                name: 'Karusa Wind',
+                lat: -32.899648, lng: 20.628567,
+                type: 'wind', color: '#5cc8f5',
+                desc: '147 MW — Enel Green Power, Northern Cape',
+                confidence: 'HIGH',
+                confidenceReason: 'Exact WGS 84 coordinates (Global Energy Monitor)'
+            },
+            {
+                name: 'Khobab Wind',
+                lat: -30.434417, lng: 19.553944,
+                type: 'wind', color: '#5cc8f5',
+                desc: '140.3 MW — Mainstream/Infinity, Northern Cape',
+                confidence: 'HIGH',
+                confidenceReason: 'Exact WGS 84 coordinates (Global Energy Monitor)'
+            },
+            {
+                name: 'Loeriesfontein Wind',
+                lat: -30.403361, lng: 19.589,
+                type: 'wind', color: '#5cc8f5',
+                desc: '140.3 MW — Mainstream/Infinity, Northern Cape',
+                confidence: 'HIGH',
+                confidenceReason: 'Exact WGS 84 coordinates (Global Energy Monitor)'
+            },
+            {
+                name: 'Jeffreys Bay Wind',
+                lat: -34.05, lng: 24.92,
+                type: 'wind', color: '#5cc8f5',
+                desc: '138 MW — Jeffreys Bay wind farm cluster, Eastern Cape',
+                confidence: 'MEDIUM',
+                confidenceReason: 'Approximate location based on REIPPPP project data'
+            },
+            {
+                name: 'Cookhouse Wind',
+                lat: -32.75, lng: 25.8,
+                type: 'wind', color: '#5cc8f5',
+                desc: 'Cookhouse wind cluster, Eastern Cape',
+                confidence: 'MEDIUM',
+                confidenceReason: 'Approximate location based on REIPPPP project data'
+            },
+
+            // === HYDRO — Exact pumped storage coordinates ===
+            {
+                name: 'Drakensberg PS',
+                lat: -28.566, lng: 29.0834,
+                type: 'hydro', color: '#4dd97a',
+                desc: '1,000 MW — pumped storage, Okhahlamba, KwaZulu-Natal',
+                confidence: 'HIGH',
+                confidenceReason: 'Exact WGS 84 coordinates (Global Energy Monitor)'
+            },
+            {
+                name: 'Ingula PS',
+                lat: -28.2809, lng: 29.588,
+                type: 'hydro', color: '#4dd97a',
+                desc: '1,332 MW — pumped storage, Little Drakensberg, KZN/Free State border',
+                confidence: 'HIGH',
+                confidenceReason: 'Exact WGS 84 coordinates (Global Energy Monitor)'
+            }
         ];
 
         const demandNodes = [
-            { name: 'Johannesburg', lat: -26.2, lng: 28.0, desc: 'Gauteng — largest electricity consumer' },
-            { name: 'Pretoria', lat: -25.7, lng: 28.2, desc: 'Tshwane — government & industry hub' },
-            { name: 'Durban', lat: -29.8, lng: 31.0, desc: 'KZN — port, manufacturing, tourism' },
-            { name: 'Cape Town', lat: -33.9, lng: 18.4, desc: 'Western Cape — metro & industry' }
+            {
+                name: 'Johannesburg',
+                lat: -26.2041, lng: 28.0473,
+                desc: 'Gauteng — largest electricity consumer in South Africa',
+                confidence: 'HIGH',
+                confidenceReason: 'City centre coordinates (public geographic data)'
+            },
+            {
+                name: 'Pretoria',
+                lat: -25.7479, lng: 28.2293,
+                desc: 'Tshwane — government and industrial hub',
+                confidence: 'HIGH',
+                confidenceReason: 'City centre coordinates (public geographic data)'
+            },
+            {
+                name: 'Durban',
+                lat: -29.8587, lng: 31.0218,
+                desc: 'eThekwini — port, manufacturing, tourism load',
+                confidence: 'HIGH',
+                confidenceReason: 'City centre coordinates (public geographic data)'
+            },
+            {
+                name: 'Cape Town',
+                lat: -33.9249, lng: 18.4241,
+                desc: 'Western Cape — metropolitan and industrial demand',
+                confidence: 'HIGH',
+                confidenceReason: 'City centre coordinates (public geographic data)'
+            }
         ];
 
         const storageSites = [
-            { name: 'Drakensberg PS', lat: -28.7, lng: 29.0, type: 'pumped' },
-            { name: 'Ingula PS', lat: -28.3, lng: 29.1, type: 'pumped' },
-            { name: 'Palmiet PS', lat: -34.0, lng: 19.0, type: 'pumped' },
-            { name: 'BESS Northern Cape', lat: -28.5, lng: 21.5, type: 'bess' },
-            { name: 'BESS Gauteng', lat: -26.0, lng: 28.1, type: 'bess' }
+            {
+                name: 'Drakensberg PS',
+                lat: -28.566, lng: 29.0834,
+                type: 'pumped',
+                confidence: 'HIGH',
+                confidenceReason: 'Exact WGS 84 coordinates (Global Energy Monitor)'
+            },
+            {
+                name: 'Ingula PS',
+                lat: -28.2809, lng: 29.588,
+                type: 'pumped',
+                confidence: 'HIGH',
+                confidenceReason: 'Exact WGS 84 coordinates (Global Energy Monitor)'
+            },
+            {
+                name: 'Palmiet PS',
+                lat: -34.1985, lng: 18.9746,
+                type: 'pumped',
+                confidence: 'HIGH',
+                confidenceReason: 'Exact WGS 84 coordinates (Global Energy Monitor)'
+            },
+            // BESS Phase 1 sites from Eskom
+            {
+                name: 'Skaapvlei BESS',
+                lat: -33.8, lng: 18.6,
+                type: 'bess',
+                confidence: 'MEDIUM',
+                confidenceReason: 'Approximate substation location (Eskom BESS Phase 1, WSP project data)'
+            },
+            {
+                name: 'Hex BESS',
+                lat: -33.65, lng: 19.45,
+                type: 'bess',
+                confidence: 'MEDIUM',
+                confidenceReason: 'Near Worcester substation (Eskom BESS Phase 1, opened Nov 2023)'
+            },
+            {
+                name: 'Melkhout BESS',
+                lat: -33.5, lng: 26.5,
+                type: 'bess',
+                confidence: 'MEDIUM',
+                confidenceReason: 'Approximate substation location (Eskom BESS Phase 1, Eastern Cape)'
+            },
+            {
+                name: 'Elandskop BESS',
+                lat: -29.5, lng: 30.2,
+                type: 'bess',
+                confidence: 'MEDIUM',
+                confidenceReason: 'Msunduzi/Impendle area (Eskom BESS Phase 1, KwaZulu-Natal)'
+            },
+            {
+                name: 'Pongola BESS',
+                lat: -27.0, lng: 31.6,
+                type: 'bess',
+                confidence: 'MEDIUM',
+                confidenceReason: 'Approximate substation location (Eskom BESS Phase 1, KwaZulu-Natal)'
+            },
+            {
+                name: 'Graafwater BESS',
+                lat: -32.15, lng: 18.6,
+                type: 'bess',
+                confidence: 'MEDIUM',
+                confidenceReason: 'Approximate substation location (Eskom BESS Phase 1, Western Cape)'
+            },
+            {
+                name: 'Paleisheuwel BESS',
+                lat: -32.6, lng: 18.7,
+                type: 'bess',
+                confidence: 'MEDIUM',
+                confidenceReason: 'Approximate substation location (Eskom BESS Phase 1, Western Cape)'
+            },
+            {
+                name: 'Rietfontein BESS',
+                lat: -29.2, lng: 20.0,
+                type: 'bess',
+                confidence: 'MEDIUM',
+                confidenceReason: 'Approximate substation location (Eskom BESS Phase 1, Northern Cape)'
+            }
         ];
 
-        // All flow connections
+        // Conceptual flows — not based on actual transmission line data
         const flows = [
-            { from: [-29.0, 21.5], to: [-26.2, 28.0], color: '#f5c842', source: 'solar', critical: true },
-            { from: [-29.0, 21.5], to: [-25.7, 28.2], color: '#f5c842', source: 'solar' },
-            { from: [-33.9, 18.5], to: [-33.9, 18.4], color: '#5cc8f5', source: 'wind' },
-            { from: [-32.3, 27.0], to: [-29.8, 31.0], color: '#5cc8f5', source: 'wind' },
-            { from: [-32.3, 27.0], to: [-26.2, 28.0], color: '#5cc8f5', source: 'wind' },
-            { from: [-25.5, 29.5], to: [-26.2, 28.0], color: '#8a95a8', source: 'coal' },
-            { from: [-25.5, 29.5], to: [-25.7, 28.2], color: '#8a95a8', source: 'coal' },
-            { from: [-23.5, 29.5], to: [-26.2, 28.0], color: '#8a95a8', source: 'coal' },
-            { from: [-23.5, 29.5], to: [-25.7, 28.2], color: '#8a95a8', source: 'coal' },
-            { from: [-28.0, 29.0], to: [-26.2, 28.0], color: '#4dd97a', source: 'hydro' },
-            { from: [-28.0, 29.0], to: [-25.7, 28.2], color: '#4dd97a', source: 'hydro' }
+            // Solar flows
+            { from: [-29.1887, 21.2970], to: [-26.2041, 28.0473], color: '#f5c842', source: 'solar' },
+            { from: [-30.625, 24.02944], to: [-26.2041, 28.0473], color: '#f5c842', source: 'solar' },
+            { from: [-28.45, 21.25], to: [-26.2041, 28.0473], color: '#f5c842', source: 'solar' },
+            { from: [-28.45, 21.25], to: [-25.7479, 28.2293], color: '#f5c842', source: 'solar' },
+            // Wind flows
+            { from: [-32.899648, 20.628567], to: [-33.9249, 18.4241], color: '#5cc8f5', source: 'wind' },
+            { from: [-30.434417, 19.553944], to: [-26.2041, 28.0473], color: '#5cc8f5', source: 'wind' },
+            { from: [-30.403361, 19.589], to: [-25.7479, 28.2293], color: '#5cc8f5', source: 'wind' },
+            { from: [-34.05, 24.92], to: [-29.8587, 31.0218], color: '#5cc8f5', source: 'wind' },
+            { from: [-32.75, 25.8], to: [-26.2041, 28.0473], color: '#5cc8f5', source: 'wind' },
+            // Coal flows
+            { from: [-26.090285, 28.968796], to: [-26.2041, 28.0473], color: '#8a95a8', source: 'coal' },
+            { from: [-26.281332, 29.141506], to: [-26.2041, 28.0473], color: '#8a95a8', source: 'coal' },
+            { from: [-25.92007, 28.924942], to: [-26.2041, 28.0473], color: '#8a95a8', source: 'coal' },
+            { from: [-25.961261, 29.339713], to: [-26.2041, 28.0473], color: '#8a95a8', source: 'coal' },
+            { from: [-27.10061, 29.770963], to: [-26.2041, 28.0473], color: '#8a95a8', source: 'coal' },
+            { from: [-26.777156, 29.352376], to: [-26.2041, 28.0473], color: '#8a95a8', source: 'coal' },
+            { from: [-23.704973, 27.563839], to: [-25.7479, 28.2293], color: '#8a95a8', source: 'coal' },
+            { from: [-23.668833, 27.610838], to: [-25.7479, 28.2293], color: '#8a95a8', source: 'coal' },
+            { from: [-26.742032, 27.976892], to: [-26.2041, 28.0473], color: '#8a95a8', source: 'coal' },
+            // Hydro flows
+            { from: [-28.566, 29.0834], to: [-26.2041, 28.0473], color: '#4dd97a', source: 'hydro' },
+            { from: [-28.2809, 29.588], to: [-26.2041, 28.0473], color: '#4dd97a', source: 'hydro' }
         ];
 
-        // ===== MAP =====
+        // ===== MAP — Constrained to South Africa =====
         const map = L.map('map', {
             zoomControl: false,
             attributionControl: true,
             minZoom: 5,
-            maxZoom: 10
-        }).setView([-29.0, 25.0], 5);
+            maxZoom: 10,
+            maxBounds: [[-36, 14], [-21, 34]], // Constrain to South Africa + margin
+            maxBoundsViscosity: 1.0
+        }).setView([-29.5, 25.0], 5);
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; OSM & CARTO',
@@ -424,36 +791,42 @@
         function genIcon(color) {
             return L.divIcon({
                 className: '',
-                html: `<svg width="30" height="30" viewBox="0 0 30 30">
-                    <circle cx="15" cy="15" r="11" fill="${color}" opacity="0.9"/>
-                    <circle cx="15" cy="15" r="11" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.3" class="pulse-ring"/>
-                </svg>`,
-                iconSize: [30, 30],
-                iconAnchor: [15, 15]
-            });
-        }
-
-        function demandIcon() {
-            return L.divIcon({
-                className: '',
                 html: `<svg width="26" height="26" viewBox="0 0 26 26">
-                    <polygon points="13,3 23,23 3,23" fill="#f58c42" opacity="0.9"/>
+                    <circle cx="13" cy="13" r="9" fill="${color}" opacity="0.9"/>
+                    <circle cx="13" cy="13" r="9" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.3" class="pulse-ring"/>
                 </svg>`,
                 iconSize: [26, 26],
                 iconAnchor: [13, 13]
             });
         }
 
+        function demandIcon() {
+            return L.divIcon({
+                className: '',
+                html: `<svg width="24" height="24" viewBox="0 0 24 24">
+                    <polygon points="12,3 21,21 3,21" fill="#f58c42" opacity="0.9"/>
+                </svg>`,
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+        }
+
         function storageIcon() {
             return L.divIcon({
                 className: '',
-                html: `<svg width="22" height="22" viewBox="0 0 22 22">
-                    <rect x="4" y="4" width="14" height="14" rx="3" fill="#4dd97a" opacity="0.85"/>
-                    <rect x="4" y="4" width="14" height="14" rx="3" fill="none" stroke="#4dd97a" stroke-width="1.5" opacity="0.3" class="pulse-ring"/>
+                html: `<svg width="20" height="20" viewBox="0 0 20 20">
+                    <rect x="3" y="3" width="14" height="14" rx="3" fill="#4dd97a" opacity="0.85"/>
+                    <rect x="3" y="3" width="14" height="14" rx="3" fill="none" stroke="#4dd97a" stroke-width="1.5" opacity="0.3" class="pulse-ring"/>
                 </svg>`,
-                iconSize: [22, 22],
-                iconAnchor: [11, 11]
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
             });
+        }
+
+        function confColor(level) {
+            if (level === 'HIGH') return 'var(--high)';
+            if (level === 'MEDIUM') return 'var(--medium)';
+            return 'var(--low)';
         }
 
         // ===== LAYERS =====
@@ -461,46 +834,58 @@
         const demandMarkers = [];
         const storageMarkers = [];
         const flowLayers = [];
-        const tempLayers = []; // for view-specific overlays
+        const tempLayers = [];
 
-        // Generation markers
         genNodes.forEach(n => {
             const m = L.marker([n.lat, n.lng], { icon: genIcon(n.color) }).addTo(map);
-            m.bindPopup(`<div style="font-weight:700;font-size:0.85rem;margin-bottom:3px">${n.name}</div><div style="font-size:0.74rem;color:#5e6e8a">${n.desc}</div>`, { className: 'custom-popup' });
+            m.bindPopup(`
+                <div style="font-weight:700;font-size:0.85rem;margin-bottom:4px">${n.name}</div>
+                <div style="font-size:0.74rem;color:#5e6e8a;margin-bottom:8px;line-height:1.4">${n.desc}</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+                    <span style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:${confColor(n.confidence)}">${n.confidence}</span>
+                    <span style="font-size:0.6rem;color:#3a4a66">Confidence</span>
+                </div>
+                <div style="font-size:0.65rem;color:#3a4a66;line-height:1.4">${n.confidenceReason}</div>
+            `, { className: 'custom-popup' });
             m._type = n.type;
             genMarkers.push(m);
         });
 
-        // Demand markers
         demandNodes.forEach(n => {
             const m = L.marker([n.lat, n.lng], { icon: demandIcon() }).addTo(map);
-            m.bindPopup(`<div style="font-weight:700;font-size:0.85rem;margin-bottom:3px">${n.name}</div><div style="font-size:0.74rem;color:#5e6e8a">${n.desc}</div>`, { className: 'custom-popup' });
+            m.bindPopup(`
+                <div style="font-weight:700;font-size:0.85rem;margin-bottom:4px">${n.name}</div>
+                <div style="font-size:0.74rem;color:#5e6e8a;margin-bottom:8px;line-height:1.4">${n.desc}</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+                    <span style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:${confColor(n.confidence)}">${n.confidence}</span>
+                    <span style="font-size:0.6rem;color:#3a4a66">Confidence</span>
+                </div>
+                <div style="font-size:0.65rem;color:#3a4a66;line-height:1.4">${n.confidenceReason}</div>
+            `, { className: 'custom-popup' });
             demandMarkers.push(m);
         });
 
-        // Flow lines with particles
         flows.forEach(f => {
             const line = L.polyline([f.from, f.to], {
                 color: f.color,
-                weight: f.critical ? 3 : 2,
-                opacity: 0.4,
-                dashArray: f.critical ? '5,7' : '3,8',
+                weight: 2,
+                opacity: 0.35,
+                dashArray: '4,8',
                 className: 'flow-line'
             }).addTo(map);
 
             const particle = L.circleMarker(f.to, {
-                radius: f.critical ? 5 : 3,
+                radius: 3,
                 fillColor: f.color,
                 color: f.color,
                 weight: 0,
-                fillOpacity: 0.85,
-                opacity: 0.85
+                fillOpacity: 0.7,
+                opacity: 0.7
             }).addTo(map);
 
             let t = 0;
-            const speed = f.critical ? 0.007 : 0.005;
             function anim() {
-                t += speed;
+                t += 0.005;
                 if (t > 1) t = 0;
                 particle.setLatLng([
                     f.from[0] + (f.to[0] - f.from[0]) * t,
@@ -510,7 +895,7 @@
             }
             anim();
 
-            flowLayers.push({ line, particle, source: f.source, critical: f.critical });
+            flowLayers.push({ line, particle, source: f.source });
         });
 
         // ===== VIEW STATE =====
@@ -519,29 +904,29 @@
                 question: 'Where does electricity <span class="accent">come from</span>?',
                 legendTitle: 'Generation Sources',
                 legend: [
-                    { dot: 'var(--solar)', label: 'Solar' },
-                    { dot: 'var(--wind)', label: 'Wind' },
-                    { dot: 'var(--coal)', label: 'Coal' },
-                    { dot: 'var(--hydro)', label: 'Hydro' }
+                    { dot: 'var(--solar)', label: 'Solar (named farms)' },
+                    { dot: 'var(--wind)', label: 'Wind (named farms)' },
+                    { dot: 'var(--coal)', label: 'Coal (exact stations)' },
+                    { dot: 'var(--hydro)', label: 'Hydro (exact stations)' }
                 ]
             },
             transmission: {
                 question: 'How does electricity <span class="accent">move</span>?',
-                legendTitle: 'Flow Types',
+                legendTitle: 'Flow Representation',
                 legend: [
                     { dot: '#f5c842', label: 'Solar → Demand' },
                     { dot: '#5cc8f5', label: 'Wind → Demand' },
                     { dot: '#8a95a8', label: 'Coal → Demand' },
                     { dot: '#4dd97a', label: 'Hydro → Demand' },
-                    { dot: '#f58c42', label: '⚠ Critical Corridor' }
+                    { dot: 'var(--low)', label: 'Conceptual representation' }
                 ]
             },
             storage: {
                 question: 'Where can energy <span class="accent">wait</span>?',
-                legendTitle: 'Storage Types',
+                legendTitle: 'Storage Infrastructure',
                 legend: [
-                    { dot: '#4dd97a', label: 'Pumped Hydro' },
-                    { dot: '#5cc8f5', label: 'Battery (BESS)' }
+                    { dot: '#4dd97a', label: 'Pumped Hydro (exact)' },
+                    { dot: '#5cc8f5', label: 'Battery (approximate)' }
                 ]
             },
             demand: {
@@ -555,7 +940,6 @@
 
         let currentView = 'generation';
 
-        // ===== CLEAR TEMP LAYERS =====
         function clearTemp() {
             tempLayers.forEach(l => map.removeLayer(l));
             tempLayers.length = 0;
@@ -573,31 +957,22 @@
             });
         }
 
-        function setFlowOpacity(opacity, weight = 2, criticalOpacity = null) {
-            flowLayers.forEach(({ line, critical }) => {
-                line.setStyle({
-                    opacity: critical && criticalOpacity !== null ? criticalOpacity : opacity,
-                    weight: weight
-                });
+        function setFlowOpacity(opacity, weight = 2) {
+            flowLayers.forEach(({ line }) => {
+                line.setStyle({ opacity, weight });
             });
         }
 
-        // ===== APPLY VIEW =====
         function applyView(view) {
             clearTemp();
             currentView = view;
 
-            // Update question
             document.getElementById('question').innerHTML = views[view].question;
-
-            // Update legend
             document.getElementById('legendTitle').textContent = views[view].legendTitle;
-            const legContent = document.getElementById('legendContent');
-            legContent.innerHTML = views[view].legend.map(l =>
+            document.getElementById('legendContent').innerHTML = views[view].legend.map(l =>
                 `<div class="leg-row"><div class="leg-dot" style="background:${l.dot}"></div>${l.label}</div>`
             ).join('');
 
-            // Reset all
             setOpacity(genMarkers, 1);
             setOpacity(demandMarkers, 1);
             storageMarkers.forEach(m => {
@@ -607,98 +982,57 @@
                     el.style.transition = 'opacity 0.4s ease';
                 }
             });
-            setFlowOpacity(0.4, 2);
+            setFlowOpacity(0.35, 2);
 
             if (view === 'generation') {
-                // Generation nodes POP. Everything else fades.
                 setOpacity(genMarkers, 1, 1.3);
                 setOpacity(demandMarkers, 0.25, 0.9);
-                setFlowOpacity(0.15, 1);
+                setFlowOpacity(0.12, 1);
             }
 
             if (view === 'transmission') {
-                // ALL nodes visible but subdued. FLOWS are the hero.
-                setOpacity(genMarkers, 0.5, 0.9);
-                setOpacity(demandMarkers, 0.5, 0.9);
-                setFlowOpacity(0.9, 4);
-
-                // Critical corridor highlight
-                const corridor = L.polyline([[-29.0, 21.5], [-26.2, 28.0]], {
-                    color: '#f58c42',
-                    weight: 8,
-                    opacity: 0.5,
-                    dashArray: '14,6',
-                    className: 'flow-line'
-                }).addTo(map);
-                tempLayers.push(corridor);
-
-                // Warning zone
-                const warn = L.circleMarker([-27.5, 24.5], {
-                    radius: 20,
-                    fillColor: '#f58c42',
-                    color: '#f58c42',
-                    weight: 0,
-                    fillOpacity: 0.12
-                }).addTo(map);
-                tempLayers.push(warn);
-
-                // Label
-                const label = L.marker([-27.5, 24.5], {
-                    icon: L.divIcon({
-                        className: '',
-                        html: '<div style="background:rgba(245,140,66,0.18);color:#f58c42;padding:6px 14px;border-radius:10px;font-size:0.74rem;font-weight:700;border:1.5px solid rgba(245,140,66,0.4);white-space:nowrap;backdrop-filter:blur(4px)">⚠ BOTTLENECK</div>',
-                        iconSize: [130, 30],
-                        iconAnchor: [65, -18]
-                    })
-                }).addTo(map);
-                tempLayers.push(label);
+                setOpacity(genMarkers, 0.6, 0.95);
+                setOpacity(demandMarkers, 0.6, 0.95);
+                setFlowOpacity(0.85, 3);
             }
 
             if (view === 'storage') {
-                // Generation fades. Demand visible but subdued. Storage APPEARS.
                 setOpacity(genMarkers, 0.2, 0.8);
                 setOpacity(demandMarkers, 0.5, 0.9);
-                setFlowOpacity(0.2, 1);
+                setFlowOpacity(0.15, 1);
 
-                // Add storage markers
                 storageSites.forEach(s => {
                     const m = L.marker([s.lat, s.lng], { icon: storageIcon() }).addTo(map);
-                    m.bindPopup(`<div style="font-weight:700;font-size:0.8rem">${s.name}</div><div style="font-size:0.72rem;color:#5e6e8a">${s.type === 'pumped' ? 'Pumped Hydro Storage' : 'Battery Energy Storage (BESS)'}</div>`, { className: 'custom-popup' });
+                    m.bindPopup(`
+                        <div style="font-weight:700;font-size:0.8rem;margin-bottom:4px">${s.name}</div>
+                        <div style="font-size:0.72rem;color:#5e6e8a;margin-bottom:8px">${s.type === 'pumped' ? 'Pumped Hydro Storage' : 'Battery Energy Storage (BESS)'}</div>
+                        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+                            <span style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:${confColor(s.confidence)}">${s.confidence}</span>
+                            <span style="font-size:0.6rem;color:#3a4a66">Confidence</span>
+                        </div>
+                        <div style="font-size:0.65rem;color:#3a4a66;line-height:1.4">${s.confidenceReason}</div>
+                    `, { className: 'custom-popup' });
                     storageMarkers.push(m);
 
-                    // Pulse ring
                     const pulse = L.circleMarker([s.lat, s.lng], {
                         radius: 8,
                         fillColor: '#4dd97a',
                         color: '#4dd97a',
                         weight: 0,
-                        fillOpacity: 0.4,
+                        fillOpacity: 0.35,
                         className: 'pulse-ring'
                     }).addTo(map);
                     tempLayers.push(pulse);
                 });
-
-                // Storage-to-demand flow hints
-                const sFlow1 = L.polyline([[-28.7, 29.0], [-26.2, 28.0]], {
-                    color: '#4dd97a', weight: 2, opacity: 0.5, dashArray: '4,6', className: 'flow-line'
-                }).addTo(map);
-                tempLayers.push(sFlow1);
-
-                const sFlow2 = L.polyline([[-28.3, 29.1], [-25.7, 28.2]], {
-                    color: '#4dd97a', weight: 2, opacity: 0.5, dashArray: '4,6', className: 'flow-line'
-                }).addTo(map);
-                tempLayers.push(sFlow2);
             }
 
             if (view === 'demand') {
-                // Demand nodes POP. Generation fades. Flows show direction TO demand.
                 setOpacity(genMarkers, 0.2, 0.8);
                 setOpacity(demandMarkers, 1, 1.4);
-                setFlowOpacity(0.6, 3);
+                setFlowOpacity(0.5, 2.5);
             }
         }
 
-        // ===== NAVIGATION =====
         const btns = document.querySelectorAll('.sys-btn');
         btns.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -708,7 +1042,10 @@
             });
         });
 
-        // ===== MODAL =====
+        document.getElementById('modelHeader').addEventListener('click', () => {
+            document.getElementById('modelPanel').classList.toggle('collapsed');
+        });
+
         document.getElementById('infoBtn').addEventListener('click', () => {
             document.getElementById('modal').classList.add('show');
         });
@@ -719,7 +1056,6 @@
             if (e.target.id === 'modal') document.getElementById('modal').classList.remove('show');
         });
 
-        // ===== INIT =====
         applyView('generation');
         setTimeout(() => map.invalidateSize(), 100);
         window.addEventListener('resize', () => map.invalidateSize());
