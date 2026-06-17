@@ -36,7 +36,7 @@
             width: 100vw;
         }
 
-        /* ===== HEADER — Minimal, collapsible ===== */
+        /* ===== HEADER ===== */
         .header {
             position: absolute;
             top: 0;
@@ -87,7 +87,6 @@
             color: var(--accent);
         }
 
-        /* Dropdown panels in header */
         .dropdown {
             position: absolute;
             top: 42px;
@@ -102,7 +101,6 @@
             max-width: 260px;
         }
         .dropdown.show { display: block; }
-
         .dropdown h4 {
             font-size: 0.58rem;
             font-weight: 700;
@@ -153,7 +151,7 @@
         .status-no { color: var(--text-muted); }
         .status-no .status-dot { background: var(--text-muted); }
 
-        /* ===== MAP — Dominant ===== */
+        /* ===== MAP ===== */
         .map-wrap {
             position: fixed;
             inset: 0;
@@ -163,7 +161,7 @@
         }
         #map { width: 100%; height: 100%; }
 
-        /* ===== TAB BAR — Compact, bottom ===== */
+        /* ===== TAB BAR ===== */
         .tab-bar {
             position: absolute;
             bottom: 0;
@@ -206,7 +204,7 @@
             box-shadow: 0 0 12px rgba(92, 200, 245, 0.2);
         }
 
-        /* ===== INFO BUTTON — Floating, unobtrusive ===== */
+        /* ===== INFO ===== */
         .info-float {
             position: absolute;
             bottom: 64px;
@@ -310,7 +308,6 @@
             100% { transform: scale(3.5); opacity: 0; }
         }
 
-        /* ===== RESPONSIVE ===== */
         @media (min-width: 768px) {
             .header h1 { font-size: 1.1rem; }
             .header { padding: 14px 20px; }
@@ -320,7 +317,6 @@
     </style>
 </head>
 <body>
-    <!-- HEADER — Minimal, transparent gradient -->
     <header class="header">
         <h1>South African Grid<br>Flexibility Explorer</h1>
         <div class="header-actions">
@@ -328,13 +324,11 @@
             <button class="header-btn" id="modelToggle">Model</button>
         </div>
 
-        <!-- Legend Dropdown -->
         <div class="dropdown" id="legendDropdown" style="left: 14px;">
             <h4 id="dropdownLegendTitle">Generation Sources</h4>
             <div id="dropdownLegendContent"></div>
         </div>
 
-        <!-- Model Status Dropdown -->
         <div class="dropdown model-dropdown" id="modelDropdown" style="right: 14px;">
             <h4>Model Status</h4>
             <div class="model-row">
@@ -368,12 +362,10 @@
         </div>
     </header>
 
-    <!-- MAP — Full viewport -->
     <div class="map-wrap">
         <div id="map"></div>
     </div>
 
-    <!-- TAB BAR — Bottom, compact -->
     <div class="tab-bar">
         <button class="tab active" data-view="generation">Generation</button>
         <button class="tab" data-view="transmission">Transmission</button>
@@ -381,12 +373,10 @@
         <button class="tab" data-view="demand">Demand</button>
     </div>
 
-    <!-- INFO — Floating, unobtrusive -->
     <div class="info-float">
         <button class="info-float-btn" id="infoBtn">i</button>
     </div>
 
-    <!-- MODAL -->
     <div class="modal-bg" id="modal">
         <div class="modal-box">
             <h3>About</h3>
@@ -399,7 +389,7 @@
     <script>
         // ===== VERIFIED INFRASTRUCTURE DATA =====
         const genNodes = [
-            // COAL — Exact (Global Energy Monitor)
+            // COAL — Exact (GEM)
             { name: 'Kendal PS', lat: -26.090285, lng: 28.968796, type: 'coal', color: '#8a95a8', desc: '4,116 MW — Ogies, Mpumalanga', confidence: 'HIGH', confidenceReason: 'Exact WGS 84 (GEM)' },
             { name: 'Matla PS', lat: -26.281332, lng: 29.141506, type: 'coal', color: '#8a95a8', desc: '3,600 MW — Kriel, Mpumalanga', confidence: 'HIGH', confidenceReason: 'Exact WGS 84 (GEM)' },
             { name: 'Kusile PS', lat: -25.92007, lng: 28.924942, type: 'coal', color: '#8a95a8', desc: '4,800 MW — eMalahleni, Mpumalanga', confidence: 'HIGH', confidenceReason: 'Exact WGS 84 (GEM)' },
@@ -471,7 +461,7 @@
             { from: [-28.2809, 29.588], to: [-26.2041, 28.0473], color: '#4dd97a', source: 'hydro' }
         ];
 
-        // ===== MAP — Full viewport, constrained to SA =====
+        // ===== MAP =====
         const map = L.map('map', {
             zoomControl: false,
             attributionControl: true,
@@ -620,16 +610,16 @@
                 ]
             },
             storage: {
-                legendTitle: 'Storage',
+                legendTitle: 'Storage Infrastructure',
                 legend: [
                     { dot: '#4dd97a', label: 'Pumped Hydro' },
                     { dot: '#5cc8f5', label: 'Battery (BESS)' }
                 ]
             },
             demand: {
-                legendTitle: 'Demand',
+                legendTitle: 'Demand Centres',
                 legend: [
-                    { dot: '#f58c42', label: 'Load Centres' }
+                    { dot: '#f58c42', label: 'Major Load Centres' }
                 ]
             }
         };
@@ -659,43 +649,57 @@
             });
         }
 
+        // ===== APPLY VIEW — Emphasis shifts, nothing disappears =====
         function applyView(view) {
             clearTemp();
             currentView = view;
 
-            // Update dropdown legend
             document.getElementById('dropdownLegendTitle').textContent = views[view].legendTitle;
             document.getElementById('dropdownLegendContent').innerHTML = views[view].legend.map(l =>
                 `<div class="dropdown-row"><div class="dropdown-dot" style="background:${l.dot}"></div>${l.label}</div>`
             ).join('');
 
-            setOpacity(genMarkers, 1);
-            setOpacity(demandMarkers, 1);
+            // Reset all to baseline visibility
+            setOpacity(genMarkers, 0.5, 0.9);
+            setOpacity(demandMarkers, 0.5, 0.9);
+            setFlowOpacity(0.25, 1.5);
+
+            // Remove any previous storage markers
             storageMarkers.forEach(m => {
                 const el = m.getElement();
-                if (el) {
-                    el.style.opacity = '0';
-                    el.style.transition = 'opacity 0.4s ease';
-                }
+                if (el) el.style.opacity = '0';
             });
-            setFlowOpacity(0.3, 1.5);
 
             if (view === 'generation') {
-                setOpacity(genMarkers, 1, 1.25);
-                setOpacity(demandMarkers, 0.2, 0.85);
-                setFlowOpacity(0.1, 1);
+                // Generation DOMINANT — full opacity, larger
+                // Demand visible but subdued
+                // Flows minimal
+                genMarkers.forEach(m => {
+                    const el = m.getElement();
+                    if (el) {
+                        el.style.opacity = '1';
+                        el.style.transform = 'scale(1.2)';
+                        el.style.filter = 'none';
+                    }
+                });
+                setOpacity(demandMarkers, 0.35, 0.85);
+                setFlowOpacity(0.15, 1);
             }
 
             if (view === 'transmission') {
-                setOpacity(genMarkers, 0.55, 0.9);
-                setOpacity(demandMarkers, 0.55, 0.9);
-                setFlowOpacity(0.8, 2.5);
+                // Flows DOMINANT — bright, thick
+                // Generation and demand equally visible but not emphasized
+                setOpacity(genMarkers, 0.65, 0.95);
+                setOpacity(demandMarkers, 0.65, 0.95);
+                setFlowOpacity(0.85, 2.5);
             }
 
             if (view === 'storage') {
-                setOpacity(genMarkers, 0.15, 0.75);
-                setOpacity(demandMarkers, 0.4, 0.85);
-                setFlowOpacity(0.12, 1);
+                // Storage DOMINANT — appears, pulses
+                // Generation and demand visible but faded
+                setOpacity(genMarkers, 0.3, 0.85);
+                setOpacity(demandMarkers, 0.4, 0.9);
+                setFlowOpacity(0.2, 1);
 
                 storageSites.forEach(s => {
                     const m = L.marker([s.lat, s.lng], { icon: storageIcon() }).addTo(map);
@@ -720,12 +724,25 @@
                     }).addTo(map);
                     tempLayers.push(pulse);
                 });
+
+                // Bring storage to front
+                storageMarkers.forEach(m => m.setZIndexOffset(1000));
             }
 
             if (view === 'demand') {
-                setOpacity(genMarkers, 0.15, 0.75);
-                setOpacity(demandMarkers, 1, 1.3);
-                setFlowOpacity(0.45, 2);
+                // Demand DOMINANT — full opacity, larger
+                // Generation visible but faded
+                // Flows visible showing direction
+                setOpacity(genMarkers, 0.3, 0.85);
+                demandMarkers.forEach(m => {
+                    const el = m.getElement();
+                    if (el) {
+                        el.style.opacity = '1';
+                        el.style.transform = 'scale(1.25)';
+                        el.style.filter = 'none';
+                    }
+                });
+                setFlowOpacity(0.5, 2);
             }
         }
 
